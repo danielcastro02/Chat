@@ -238,6 +238,9 @@ class chatPDO
             case '.bmp':
                 imagewebp(imagecreatefromwbmp($_FILES['arquivo']['tmp_name']), __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.webp', 45);
                 break;
+            case '.mp4':
+                move_uploaded_file($_FILES['arquivo']['tmp_name'], __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.mp4');
+                break;
         }
 
         $pdo = conexao::getConexao();

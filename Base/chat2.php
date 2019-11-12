@@ -196,6 +196,7 @@ if (realpath("./index.php")) {
     }
 
     function startPushListener() {
+        $(".materialboxed").materialbox();
         $(".bodyChatBox").scrollTop($(".bodyChatBox").height() * 150);
         refreshChat = setInterval(intervalo, 500);
     }
