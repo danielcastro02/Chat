@@ -57,10 +57,9 @@ class chatPDO
             $stmt->bindValue(":id_chat", $_GET['last_id']);
             $stmt->execute();
             if ($stmt->rowCount() > 0) {
-                $stmtUpdate = $pdo->prepare("update chat set visualizado = 1 where id_chat in(select s.* from (select id_chat from chat where (id_remetente = :id_destinatario and id_destinatario = :id_destinatario) and id_chat > :id_chat) as s)");
+                $stmtUpdate = $pdo->prepare("update chat set visualizado = 1 where id_chat in(select s.* from (select id_chat from chat where (id_remetente = :id_destinatario and id_destinatario = :id_destinatario)) as s)");
                 $stmtUpdate->bindValue(":id_remetente", $this->logado->getId_usuario());
                 $stmtUpdate->bindValue(":id_destinatario", $_GET['destinatario']);
-                $stmtUpdate->bindValue(":id_chat", $_GET['last_id']);
                 $stmtUpdate->execute();
                 while ($linha = $stmt->fetch()) {
                     $chat = new Chat($linha);
@@ -218,33 +217,40 @@ class chatPDO
         $ext = explode('.', $_FILES['arquivo']['name']);
         $extensao = "." . $ext[(count($ext) - 1)];
         $extensao = strtolower($extensao);
+        $extFinal = ".webp";
         switch ($extensao) {
             case '.jfif':
             case '.jpeg':
             case '.jpg':
                 imagewebp(imagecreatefromjpeg($_FILES['arquivo']['tmp_name']), __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.webp', 45);
+            $extFinal = ".webp";
                 break;
             case '.svg':
                 move_uploaded_file($_FILES['arquivo']['tmp_name'], __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.svg');
+                $extFinal = ".svg";
                 break;
             case '.png':
                 $img = imagecreatefrompng($_FILES['arquivo']['tmp_name']);
                 imagepalettetotruecolor($img);
                 imagewebp($img, __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.webp', 45);
+                $extFinal = ".webp";
                 break;
             case '.webp':
                 imagewebp(imagecreatefromwebp($_FILES['arquivo']['tmp_name']), __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.webp', 45);
+                $extFinal = ".webp";
                 break;
             case '.bmp':
                 imagewebp(imagecreatefromwbmp($_FILES['arquivo']['tmp_name']), __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.webp', 45);
+                $extFinal = ".webp";
                 break;
             case '.mp4':
                 move_uploaded_file($_FILES['arquivo']['tmp_name'], __DIR__ . '/../Img/Chat/Media/' . $nome_imagem . '.mp4');
+                $extFinal = ".mp4";
                 break;
         }
 
         $pdo = conexao::getConexao();
-        $stmt = $pdo->prepare("insert into chat values (default , :id_remetente , :id_destinatario , 1 , './Img/Chat/Media/" . $nome_imagem . '.webp' . "' , '' , default , 0)");
+        $stmt = $pdo->prepare("insert into chat values (default , :id_remetente , :id_destinatario , 1 , './Img/Chat/Media/" . $nome_imagem . $extFinal . "' , '' , default , 0)");
         $stmt->bindValue(":id_remetente", $this->logado->getId_usuario());
         $stmt->bindValue(":id_destinatario", $_GET['destinatario']);
         if ($stmt->execute()) {
